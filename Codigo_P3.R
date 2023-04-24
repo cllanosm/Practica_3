@@ -4,15 +4,15 @@ View(epa_http)
 
 str(epa_http)
 
-epa_http$X6 <- as.numeric(epa_http$X6)
+epa_http$return_code <- as.numeric(epa_http$return_code)
 
 read_table(epa_http)
 
-epa_http$X1 <- as.character(epa_http$X1)
+epa_http$source <- as.character(epa_http$source)
 
 str(epa_http)
 
-epa_http$X6 <- as.integer(epa_http$X6)
+epa_http$return_code <- as.integer(epa_http$return_code)
 
 
 #Pregunta 2 Identificar el número único de usuarios que han interactuado directamente con
@@ -20,10 +20,32 @@ epa_http$X6 <- as.integer(epa_http$X6)
 #error en las distintas peticiones ofrecidas por el servidor.
 
 
-usuarios_sinerror <- sum(epa_http$X6 == "200")
-usuarios_conerror <- sum(epa_http$X6 != "200")
+usuarios_sinerror <- sum(epa_http$return_code == "200")
+usuarios_conerror <- sum(epa_http$return_code != "200")
 
 print(paste("Cantidad de usuarios que no han tenido ningun error en peticiones al servidor:", usuarios_sinerror))
 print(paste("Cantidad de usuarios con errores en peticiones al servidor:",usuarios_conerror))
 
-nrow(epa_http)
+tipo_errores <- unique(epa_http$return_code)
+print(tipo_errores)
+
+filtro200 <-  subset(epa_http, return_code != "200")
+conteo_errores <-  table(filtro200$return_code)
+print(conteo_errores)
+#######################################################################
+
+epa_http$X3 <- as.factor(epa_http$X3)
+epa_http_one_hot$return_code <- as.factor(epa_http_one_hot$return_code)
+
+
+library(mltools)
+library(data.table)
+epa_http_one_hot <- one_hot(as.data.table(epa_http), sparsifyNAs = TRUE)
+
+
+#Codigo para cambiar nombre de columnas
+colnames(epa_http) <- c("source", "datetime", "http_method", "resource", "http_version", "return_code", "bytes_sent")
+
+epa_http$http_method <- gsub('[\"]', '', epa_http$http_method)
+
+########
